@@ -37,7 +37,7 @@ int main(void)
 			PixelSet_ks0108((int)X++,(int)buff,1);
 		}*/
 		
-		//ScreenFill_ks0108(ScreenFill_Dark);
+		//ScreenFill_ks0108(Flag_Buffer.BackgroundDark);
 		
 		//for(Y=0,X=127;X>-1;X--,Y+=0.1){
 		//for(Y=0;Y<15;Y++){
@@ -52,10 +52,12 @@ int main(void)
 
 Child	world;
 Child	mycar;
+Child	car_out0;
+Child	pixel;
 
 void nippy(void){
-	world.BitmapFile=WOLD;
-	world.BitmapMode=BitmapMode_SetOnScreen|BitmapMode_ConstFlash;
+	world.BitmapFile=example;
+	world.BitmapMode=BitmapMode_MergeOnScreen|BitmapMode_ConstFlash;
 	world.Width=128;
 	world.Height=64;
 	world.X_Pos=0;
@@ -66,39 +68,50 @@ void nippy(void){
 	mycar.BitmapFile=car;
 	mycar.BitmapMode=BitmapMode_ConstSram|BitmapMode_SetOnScreen;
 	mycar.X_Pos=0;
-	mycar.Y_Pos=30;
+	mycar.Y_Pos=23	;
 	mycar.Width=15;
 	mycar.Height=13;
 	
-	Nippy_Send(world);
-	_delay_ms(750);
+	car_out0.BitmapMode=BitmapMode_ConstSram|BitmapMode_MergeOnScreen;
+	car_out0.X_Pos=0;
+	car_out0.Y_Pos=28;
+	car_out0.Width=7;
+	car_out0.Height=3;
 	
-	/*for(i=0;i<128;i+=5){
-		mycar.X_Pos=i;
-		//Nippy_Send(world);
-		Nippy_Send(mycar);
-		_delay_ms(50);
-		Nippy_Mop();
-	}*/
-//Nippy_Send(world);
+	/*pixel.BitmapMode=BitmapMode_SetPixelOnXY;
+	pixel.PixelColor=PixelColor_Dark;
+	pixel.X_Pos=70;
+	pixel.Y_Pos=63;
+	Nippy_Send(pixel);*/
+	Nippy_Send(mycar);
 
+ 
 }
 
 void nippy_main(void){
-	
-	for(i=0;i<64;i+=8){
-		world.Y_Pos=i;
-		world.X_Pos=2*i;
+	static	int j=0;
+
+
+	/*for(i=0;i<128;i++){
+		j^=1;
+		if(j)	car_out0.BitmapFile=out0;
+		else	car_out0.BitmapFile=out1;
+		
+		mycar.X_Pos=i;
+		if(i>7)car_out0.X_Pos=mycar.X_Pos-6;
 		//circuit.X_Pos=2*i;
 		
 		
-		
 		Nippy_Send(world);
-		_delay_ms(350);
-		Nippy_Mop();
-
+		
+		Nippy_Send(mycar);
+		if(i>7)	Nippy_Send(car_out0);	
+		_delay_ms(100);
+		Nippy_Mop(&car_out0);
+		//Nippy_Mop(&mycar);
+		
 		//Nippy_Send(world);
 		
-	}
+	}*/
 	
 }

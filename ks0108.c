@@ -1,5 +1,6 @@
 #include "ks0108.h"//ks0108 with two pin select
 
+
 volatile uint8_t test=0;
 
 /* Image data for monochrome displays organized as rows of vertical bytes (Data RAM set)*/
@@ -130,8 +131,10 @@ void Init_ks0108(uint8_t	mode,void (*Function_Call)(void)){
 	Set_ZAddress(0);
 	}_End(_NULL);//GE_State
 	
-	ScreenFill_ks0108(mode&1);
-	Flag_Buffer.BackgroundDark= mode&1;
+	ScreenFill_ks0108(mode);
+	Flag_Buffer.BackgroundDark=	 mode&1;
+	Flag_Buffer.DefaultFont=	arial_narrow;
+	Flag_Buffer.DefaulFont_Mode=	FontSet_ConstFlash;
 	
 	Function_Call();	
 	}//void
@@ -217,7 +220,7 @@ volatile uint8_t	tst=36;
 //used pgmspace
 //bitmap_set______________________________________________________________________________________________________________________________________________________-
 
-void *	BitmapSet_ks0108(const uint8_t	*BMP	\
+void 	BitmapSet_ks0108(const uint8_t	*BMP	\
 						, char	xPos, char	yPos	\
 						, uint8_t	width, uint8_t	 height	\
 						,uint8_t (*BitmapFuncAddrss)(/*unsigned char suggested*/const void *)\
@@ -239,7 +242,7 @@ bit3	BitmapReadSram	1
 
 uint8_t	_buffer[(2*width)];
 uint16_t	_Counter=0,buff_Cntr=0;
-uint8_t dx,dx1/*object Corner*/ ;		
+uint8_t dx,dy ;/*object Corner*/		
 //PRE REQUESTICS
 struct BS_Strct{
 uint8_t	Width;	
@@ -253,9 +256,9 @@ unsigned LocateMode1:1;//relate to	BitmapMode_FunctionAddress
 }BsFlags;//bitmapset Flags
 
 	BsFlags.ShiftValue=yPos%8;
-	yPos/=8;
 	BsFlags.Height=(height%8==0)?((int)height/8 ):((int)height/8 +1);
 	height=BsFlags.Height*width;//size of out
+	yPos/=8;
 	BsFlags.Height+=yPos;	
 	
 	BsFlags.Width= width+xPos;
@@ -270,10 +273,9 @@ unsigned LocateMode1:1;//relate to	BitmapMode_FunctionAddress
 						
 //------_______________-----------__________________------____________						
 						if(BsFlags.ShiftValue){//y_pos%8!=0	
-		
-							for(;yPos<BsFlags.Height+1;yPos++){
-								for(dx=xPos, dx1=xPos+width; dx< BsFlags.Width /*&& (BsFlags.Width)<=128*/ ;dx++,dx1=xPos+width){
-									tst=dx1;
+
+							for(dy=yPos;dy<BsFlags.Height+1;dy++){
+								for(dx=xPos; dx< BsFlags.Width /*&& (BsFlags.Width)<=128*/ ;dx++){
 									/*if(dx>127)	{	//object corners check
 										_Counter+=dx1-128;
 										break;
@@ -281,22 +283,39 @@ unsigned LocateMode1:1;//relate to	BitmapMode_FunctionAddress
 									//_delay_ms(50);
 //SET MODE*******************************************************************************************************									
 									if(BsFlags.ApplyMode){//check bitmap set mode
-										if(dx==xPos || dx==64 ) XYSet_ks0108(dx,yPos);//set current cursor position																	
-													_buffer[buff_Cntr]=BsFlags.LocateMode0?/*READ SRAM*/ BMP[_Counter] :	\
-																				 (!BsFlags.LocateMode1)?/*READ From FA*/BitmapFuncAddrss(&BMP[_Counter]):	\
-																							/*READ From FLASH*/pgm_read_byte(&BMP[_Counter]);
-												
-												if(dx>127 || yPos>7)	Data_PORT=0;//Flush data port after overflow on corner										 
-												else if(_Counter<height/*6*/){	
-													Data_PORT=(_buffer[buff_Cntr]<<BsFlags.ShiftValue) | ( (buff_Cntr>(width-1)) ?						\
+										if(dx==xPos || dx==64 ) XYSet_ks0108(dx,dy);//set current cursor position																	
+													_buffer[buff_Cntr]=( BsFlags.LocateMode0?/*READ SRAM*/ BMP[_Counter] :	\
+																				 ( (!BsFlags.LocateMode1)?/*READ From FA*/BitmapFuncAddrss(&BMP[_Counter]):	\
+																										/*READ From FLASH*/pgm_read_byte(&BMP[_Counter]))	\
+																		);					
+												 if(dy==yPos){//row **10**
+																_mode=Read_ks0108(Read_DisplayData,dx,dy);	
+																XYSet_ks0108(dx,XYSet_DontMatterPos);	
+																_mode=( (1<<BsFlags.ShiftValue)-1 ) & _mode; 
+
+												 }
+												 else	_mode=0;
+												 
+												// _delay_ms(1000);
+												 
+												if(dx>126 || dy>7)	Data_PORT=0;//Flush data port after overflow on corner										 
+												else if(_Counter<height/*6 size of data*/){	
+													Data_PORT=(_buffer[buff_Cntr]<<BsFlags.ShiftValue) | ( (buff_Cntr>(width-1)) ?	/*check buffer filled*/	\
 															  (	_buffer[buff_Cntr-width]>>(8-BsFlags.ShiftValue)) :		 \
-															  (_buffer[buff_Cntr+width]>>(8-BsFlags.ShiftValue))  ) ;
+															  (_buffer[buff_Cntr+width]>>(8-BsFlags.ShiftValue))  ) |_mode;
 													_Do_Send(_Do_SendBusy_wait);										  
 												}//else if
 												else{
-														Data_PORT=		( (buff_Cntr>(width-1)) ?						\
-																		(	_buffer[buff_Cntr-width]>>(8-BsFlags.ShiftValue)) :	 \
-																		(_buffer[buff_Cntr+width]>>(8-BsFlags.ShiftValue))  ) ;	
+														_mode=Read_ks0108(Read_DisplayData,dx,dy);/*10*/
+														XYSet_ks0108(dx,XYSet_DontMatterPos);
+														tst=_mode=( ( (1<<(8-BsFlags.ShiftValue))-1 )<<BsFlags.ShiftValue) & _mode ;
+														
+														Data_PORT=   _mode | (		(buff_Cntr>(width-1)) ?			\
+																					(_buffer[buff_Cntr-width]>>(8-BsFlags.ShiftValue)) :	 \
+																					(_buffer[buff_Cntr+width]>>(8-BsFlags.ShiftValue))		 \
+																			 );  
+																		
+																							
 														_Do_Send(_Do_SendBusy_wait);					
 												}//else
 													/*Data port= ( Data on current row)<<(ypos%8) | ( current Data number on pre row)>>(8-ypos%8) */
@@ -305,13 +324,13 @@ unsigned LocateMode1:1;//relate to	BitmapMode_FunctionAddress
 									}//if BsFlags.ApplyMode
 //MERGE MODE*******************************************************************************************************											
 									else{//bitmap merge
-										_mode=Read_ks0108(Read_DisplayData,dx,yPos);
+										_mode=Read_ks0108(Read_DisplayData,dx,dy);
 										XYSet_ks0108(dx,XYSet_DontMatterPos);
 
 												_buffer[buff_Cntr]=BsFlags.LocateMode0?/*READ SRAM*/ BMP[_Counter] :	\
 																			(!BsFlags.LocateMode1)?/*READ From FA*/BitmapFuncAddrss(&BMP[_Counter]):	\
 																					  /*READ From FLASH*/pgm_read_byte(&BMP[_Counter]);
-												if(dx>127 || yPos>7)	Data_PORT=0;//Flush data port after overflow on corner 										  
+												if(dx>126 || dy>7)	Data_PORT=0;//Flush data port after overflow on corner 										  
 												else if(_Counter<height/*6*/){	
 														Data_PORT=(_buffer[buff_Cntr]<<BsFlags.ShiftValue) | _mode | ( (buff_Cntr>(width-1)) ?		\
 																  (	_buffer[buff_Cntr-width]>>(8-BsFlags.ShiftValue)) :		 \
@@ -339,30 +358,40 @@ unsigned LocateMode1:1;//relate to	BitmapMode_FunctionAddress
 //------_______________-----------__________________------____________								
 						else{//ypos%8==0
 							
-							for(;yPos<BsFlags.Height ;yPos++){
-								for(dx=xPos, dx1=xPos+width; dx<BsFlags.Width /*&& (BsFlags.Width)<=128*/ ;dx++, dx1=xPos+width){
+							for(dy=yPos;dy<BsFlags.Height ;dy++){
+								for(dx=xPos; dx<BsFlags.Width /*&& (BsFlags.Width)<=128*/ ;dx++){
 									/*if(dx>127)	{	//object corners check
 										_Counter+=dx1-128;
 										break;
 									}*/
 									if(BsFlags.ApplyMode){//bitmap set 
-												if(dx==xPos || dx==64)/*set cursor position*/XYSet_ks0108(dx,yPos);
-												if(dx>127 || yPos>7)	Data_PORT=0;//Flush data port after overflow on corner 
+												
+												if(dx==xPos || dx==64)/*set cursor position*/XYSet_ks0108(dx,dy);
+												
+												/*if(dy==yPos){//row **10**
+													_mode=Read_ks0108(Read_DisplayData,dx,dy);
+													XYSet_ks0108(dx,XYSet_DontMatterPos);
+													_mode=(int)pow(2,BsFlags.ShiftValue);
+
+												}
+												else	_mode=0;*/
+												
+												if(dx>127 || dy>7)	Data_PORT=0;//Flush data port after overflow on corner 
 												else{
-													Data_PORT=( BsFlags.LocateMode0?/*ReadSram*/												\
+													Data_PORT=/*_mode|*/( BsFlags.LocateMode0?/*ReadSram*/												\
 																(BMP[_Counter]):													\
 																(!BsFlags.LocateMode1)?/*READ From FA*/BitmapFuncAddrss(&BMP[_Counter]):		\
 																				/*READ From FLASH*/pgm_read_byte(&BMP[_Counter])	\
-															);//?  
+															);  
 												_Do_Send(_Do_SendBusy_wait);			
 												}//else
 												_Counter++;
 										}//if	
 												
 									else{//bitmap merge
-								/*bitmap merge*/_mode=Read_ks0108(Read_DisplayData,dx,yPos);	
+								/*bitmap merge*/_mode=Read_ks0108(Read_DisplayData,dx,dy);	
 												XYSet_ks0108(dx,XYSet_DontMatterPos);
-												if(dx>127 || yPos>7)	Data_PORT=0;//Flush data port after overflow on corner 
+												if(dx>127 || dy>7)	Data_PORT=0;//Flush data port after overflow on corner 
 												else{
 													Data_PORT=( BsFlags.LocateMode0?/*ReadSram*/												\
 																( BMP[_Counter] | _mode ) :													\
@@ -378,6 +407,137 @@ unsigned LocateMode1:1;//relate to	BitmapMode_FunctionAddress
 								}//inner for
 							}//outer for
 						}//else
-					}_End( _EndDont_EnTrigger  );	
-return 0;	
+					}_End( _EndDont_EnTrigger  );		
 }
+//____________________________________________________________________________________________________
+/*
+modes of operation:
+
+#define	BitmapReadSram	4
+#define	BitmapMode_FunctionAddress	0
+#define BitmapMode_ConstFlash	16
+***** Nippy_Mop(&mycar);
+*/
+void 	BitmapClear_ks0108(const uint8_t	*BMP	\
+						, char	xPos, char	yPos	\
+						, uint8_t	width, uint8_t	 height	\
+						,uint8_t (*BitmapFuncAddrss)(/*unsigned char suggested*/const void *)	\
+						, uint8_t		_mode){
+							
+uint8_t	_buffer[(2*width)],Data_Buffer;
+uint16_t	_Counter=0,buff_Cntr=0;
+uint8_t dx,dy/*object Corner*/ ;
+
+//PRE REQUESTICS
+struct BS_Strct{
+	uint8_t	Width;
+	uint8_t	Height;
+
+	unsigned ShiftValue:5;
+	unsigned LocateMode0:1;//Locate On Sram or flash.
+	unsigned LocateMode1:1;//relate to	BitmapMode_FunctionAddress
+
+}BsFlags;//bitmapset Flags
+
+BsFlags.ShiftValue=yPos%8;
+BsFlags.ShiftValue=yPos%8;
+BsFlags.Height=(height%8==0)?((int)height/8 ):((int)height/8 +1);
+height=BsFlags.Height*width;//size of out
+yPos/=8;
+BsFlags.Height+=yPos;
+
+BsFlags.Width= width+xPos;
+BsFlags.LocateMode0=(_mode>>2)&1;	//bitmap read FA and sram
+BsFlags.LocateMode1=(_mode>>4)&1;
+
+for(buff_Cntr=0; buff_Cntr < (2*width); buff_Cntr++) _buffer[buff_Cntr]=0;//free buffer
+buff_Cntr=0;
+
+					_Do(_DoDATA_Write   ){
+						
+//------_______________-----------__________________------____________						
+						if(BsFlags.ShiftValue){//y_pos%8!=0	
+
+							for(dy=yPos;dy<BsFlags.Height+1;dy++){
+								for(dx=xPos; dx< BsFlags.Width /*&& (BsFlags.Width)<=128*/ ;dx++){
+										
+									
+										_mode=Read_ks0108(Read_DisplayData,dx,dy);
+										XYSet_ks0108(dx,XYSet_DontMatterPos);
+										if(dy==yPos)	Data_Buffer=( (1<<BsFlags.ShiftValue)-1 ) & _mode;
+
+
+										else	Data_Buffer=0;
+										
+										
+												_buffer[buff_Cntr]=BsFlags.LocateMode0?/*READ SRAM*/ BMP[_Counter] :	\
+																			(!BsFlags.LocateMode1)?/*READ From FA*/BitmapFuncAddrss(&BMP[_Counter]):	\
+																					  /*READ From FLASH*/pgm_read_byte(&BMP[_Counter]);
+												if(dx>126 || dy>7)	Data_PORT=0;//Flush data port after overflow on corner 										  
+												else if(_Counter<height/*6*/){	
+														Data_PORT=Data_Buffer|((_buffer[buff_Cntr]<<BsFlags.ShiftValue) & _mode & ( (buff_Cntr>(width-1)) ?		\
+																  (	_buffer[buff_Cntr-width]>>(8-BsFlags.ShiftValue)) :		 \
+																  (_buffer[buff_Cntr+width]>>(8-BsFlags.ShiftValue))  )/*Outer or*/) ;
+														_Do_Send(_Do_SendBusy_wait);			
+												}//else if
+												else{	
+													Data_Buffer=( ( (1<<(8-BsFlags.ShiftValue))-1 )<<BsFlags.ShiftValue) & _mode;
+													Data_PORT= Data_Buffer|(_mode&( (buff_Cntr>(width-1)) ?				\
+												   					 (	_buffer[buff_Cntr-width]>>(8-BsFlags.ShiftValue)) :	 \
+																	 (_buffer[buff_Cntr+width]>>(8-BsFlags.ShiftValue))  )/*Outer or*/) ;
+													_Do_Send(_Do_SendBusy_wait);				 
+												}
+											
+												/*Data port= ( Data on current row)<<(ypos%8) | ( current Data number on pre row)>>(8-ypos%8) */
+												buff_Cntr++;_Counter++;  
+									
+									
+									//_delay_ms(100);
+								}//inner for
+								if(buff_Cntr==2*width)	buff_Cntr=0;
+								
+							}//outer for
+						}//if	y_pos%8
+//------_______________-----------__________________------____________								
+						else{//ypos%8==0
+							
+							for(dy=yPos;dy<BsFlags.Height ;dy++){
+								for(dx=xPos; dx<BsFlags.Width /*&& (BsFlags.Width)<=128*/ ;dx++){
+							
+									
+								/*bitmap merge*/_mode=Read_ks0108(Read_DisplayData,dx,dy);	
+												XYSet_ks0108(dx,XYSet_DontMatterPos);
+												if(dx>127 || dy>7)	Data_PORT=0;//Flush data port after overflow on corner 
+												else{
+													Data_PORT=( BsFlags.LocateMode0?/*ReadSram*/												\
+																( BMP[_Counter] & _mode ) :													\
+																( (!BsFlags.LocateMode1)?/*READ From FA*/BitmapFuncAddrss(&BMP[_Counter]):	\
+																			/*READ From FLASH*/pgm_read_byte(&BMP[_Counter]) & _mode )		\
+															);//?
+													_Do_Send(_Do_SendBusy_wait);
+												
+												_Counter++;
+												}
+									
+									
+								}//inner for
+							}//outer for
+						}//else
+					}_End( _EndDont_EnTrigger  );		
+	
+}//end of func
+//______________________________________________________________________________________________
+
+//__________________________________________________________________________________
+/*
+Font: Default*Arial*
+
+#define	FontSetReadSram	4
+#define	FontSet_FunctionAddress	0
+#define FontSet_ConstFlash	16
+
+*/
+void FontSet_ks0108(const uint8_t* FonT,uint8_t _mode){
+	Flag_Buffer.DefaultFont=FonT;
+	Flag_Buffer.DefaulFont_Mode=_mode;
+};

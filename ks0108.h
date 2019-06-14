@@ -4,7 +4,8 @@
 #include <util/delay.h>
 #include <avr/io.h>
 #include <avr/pgmspace.h>
-#include "Nippy.h"
+#include "Fonts.h"
+
 
 #define _NULL 0
 	
@@ -21,10 +22,15 @@ struct Tmp_Buffer{
 	uint8_t DepPort_Backup;
 	uint8_t Data_Backup;
 	
+	const uint8_t *DefaultFont;
+	uint8_t	DefaulFont_Mode;
+	
 	unsigned	Buffer_UseFlag:1;
 	//void(*Nippy_Init)(void);
 	void(*Nippy_Main)(void);
 }Flag_Buffer;	
+
+
 #define Init_ks0108_DarkBackground	ScreenFill_Dark
 #define Init_ks0108_LightBackground	ScreenFill_Light
 void Init_ks0108(uint8_t	mode,void (*Function_Call)(void));
@@ -52,5 +58,30 @@ void ScreenFill_ks0108(uint8_t	Color);
 #define	BitmapReadSram	4
 #define	BitmapMode_FunctionAddress	0
 #define BitmapMode_ConstFlash	16
-void *	BitmapSet_ks0108(const uint8_t	*BMP, char	xPos, char	yPos, uint8_t	width, uint8_t	 height,uint8_t (*BitmapFuncAddrss)(/*unsigned char suggested*/const void *), uint8_t		_mode);
+void 	BitmapSet_ks0108(const uint8_t	*BMP, char	xPos, char	yPos, uint8_t	width, uint8_t	 height,uint8_t (*BitmapFuncAddrss)(/*unsigned char suggested*/const void *), uint8_t		_mode);
+//****************************
+/*
+modes of operation:
+
+#define	BitmapReadSram	4
+#define	BitmapMode_FunctionAddress	0
+#define BitmapMode_ConstFlash	16
+*/
+
+void 	BitmapClear_ks0108(const uint8_t	*BMP	\
+, char	xPos, char	yPos	\
+, uint8_t	width, uint8_t	 height	\
+,uint8_t (*BitmapFuncAddrss)(/*unsigned char suggested*/const void *)	\
+, uint8_t		_mode);
+
+//_______________________________________________________________________________________________
+#define	FontSetReadSram	4
+#define	FontSet_FunctionAddress	0
+#define FontSet_ConstFlash	16
+
+void FontSet_ks0108(const uint8_t* FonT,uint8_t _mode);
+
+void CharSet_ks0108();
+
+
 #endif
