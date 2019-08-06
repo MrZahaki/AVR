@@ -1,7 +1,7 @@
 #include "ks0108.h"//ks0108 with two pin select
 
 
-volatile uint8_t test=0;
+//volatile uint8_t test=0;
 
 /* Image data for monochrome displays organized as rows of vertical bytes (Data RAM set)*/
 //PROGMEM 
@@ -31,12 +31,12 @@ volatile uint8_t test=0;
 #define busy_wait()	\
 while(Read_ks0108(Read_busy,_NULL,_NULL))
 
-#define Data_DIR DDRA
-#define Data_PORT PORTA
-#define Data_PIN PINA
+#define Data_DIR DDRB
+#define Data_PORT PORTB
+#define Data_PIN PINB
 
-#define DEP_DIR DDRB
-#define DEP_PORT PORTB
+#define DEP_DIR DDRA
+#define DEP_PORT PORTA
 #define RST_BIT 0
 	#define Lcd_Reset() \
 						DEP_PORT&=~(1<<RST_BIT); _delay_us(5); \
@@ -133,9 +133,11 @@ void Init_ks0108(uint8_t	mode,void (*Function_Call)(void)){
 	
 	ScreenFill_ks0108(mode);
 	Flag_Buffer.BackgroundDark=	 mode&1;
-	Flag_Buffer.DefaultFont=	arial_narrow;
-	Flag_Buffer.DefaulFont_Mode=	FontSet_ConstFlash;
-	
+	Screen.height=64;
+	Screen.width=128;
+	Screen.color_mode= Screen_ColorMonochrom;
+	Screen._size=1024;
+	Screen.segment_size=1;//one byte
 	Function_Call();	
 	}//void
 //_________________________________________________________________________________________________________________________________________DATABUFFER
@@ -223,7 +225,7 @@ volatile uint8_t	tst=36;
 void 	BitmapSet_ks0108(const uint8_t	*BMP	\
 						, char	xPos, char	yPos	\
 						, uint8_t	width, uint8_t	 height	\
-						,uint8_t (*BitmapFuncAddrss)(/*unsigned char suggested*/const void *)\
+						,uint8_t (*BitmapFuncAddrss)(unsigned int )\
 						, uint8_t		_mode){
 
 /*
@@ -285,7 +287,7 @@ unsigned LocateMode1:1;//relate to	BitmapMode_FunctionAddress
 									if(BsFlags.ApplyMode){//check bitmap set mode
 										if(dx==xPos || dx==64 ) XYSet_ks0108(dx,dy);//set current cursor position																	
 													_buffer[buff_Cntr]=( BsFlags.LocateMode0?/*READ SRAM*/ BMP[_Counter] :	\
-																				 ( (!BsFlags.LocateMode1)?/*READ From FA*/BitmapFuncAddrss(&BMP[_Counter]):	\
+																				 ( (!BsFlags.LocateMode1)?/*READ From FA*/BitmapFuncAddrss(_Counter):	\
 																										/*READ From FLASH*/pgm_read_byte(&BMP[_Counter]))	\
 																		);					
 												 if(dy==yPos){//row **10**
@@ -328,7 +330,7 @@ unsigned LocateMode1:1;//relate to	BitmapMode_FunctionAddress
 										XYSet_ks0108(dx,XYSet_DontMatterPos);
 
 												_buffer[buff_Cntr]=BsFlags.LocateMode0?/*READ SRAM*/ BMP[_Counter] :	\
-																			(!BsFlags.LocateMode1)?/*READ From FA*/BitmapFuncAddrss(&BMP[_Counter]):	\
+																			(!BsFlags.LocateMode1)?/*READ From FA*/BitmapFuncAddrss(_Counter):	\
 																					  /*READ From FLASH*/pgm_read_byte(&BMP[_Counter]);
 												if(dx>126 || dy>7)	Data_PORT=0;//Flush data port after overflow on corner 										  
 												else if(_Counter<height/*6*/){	
@@ -380,7 +382,7 @@ unsigned LocateMode1:1;//relate to	BitmapMode_FunctionAddress
 												else{
 													Data_PORT=/*_mode|*/( BsFlags.LocateMode0?/*ReadSram*/												\
 																(BMP[_Counter]):													\
-																(!BsFlags.LocateMode1)?/*READ From FA*/BitmapFuncAddrss(&BMP[_Counter]):		\
+																(!BsFlags.LocateMode1)?/*READ From FA*/BitmapFuncAddrss(_Counter):		\
 																				/*READ From FLASH*/pgm_read_byte(&BMP[_Counter])	\
 															);  
 												_Do_Send(_Do_SendBusy_wait);			
@@ -395,7 +397,7 @@ unsigned LocateMode1:1;//relate to	BitmapMode_FunctionAddress
 												else{
 													Data_PORT=( BsFlags.LocateMode0?/*ReadSram*/												\
 																( BMP[_Counter] | _mode ) :													\
-																( (!BsFlags.LocateMode1)?/*READ From FA*/BitmapFuncAddrss(&BMP[_Counter]):	\
+																( (!BsFlags.LocateMode1)?/*READ From FA*/BitmapFuncAddrss(_Counter):	\
 																			/*READ From FLASH*/pgm_read_byte(&BMP[_Counter]) | _mode )		\
 															);//?
 													_Do_Send(_Do_SendBusy_wait);
@@ -420,13 +422,18 @@ modes of operation:
 */
 void 	BitmapClear_ks0108(const uint8_t	*BMP	\
 						, char	xPos, char	yPos	\
-						, uint8_t	width, uint8_t	 height	\
-						,uint8_t (*BitmapFuncAddrss)(/*unsigned char suggested*/const void *)	\
+						, uint16_t	width, uint16_t	 height	\
+						,uint8_t (*BitmapFuncAddrss)(/*unsigned char suggested*/unsigned int)	\
 						, uint8_t		_mode){
 							
 uint8_t	_buffer[(2*width)],Data_Buffer;
 uint16_t	_Counter=0,buff_Cntr=0;
 uint8_t dx,dy/*object Corner*/ ;
+
+Uart_sendstring( IntToStr(width));
+Uart_sendchar(' ');
+Uart_sendstring(IntToStr(height));
+Uart_sendchar(' ');
 
 //PRE REQUESTICS
 struct BS_Strct{
@@ -457,7 +464,7 @@ buff_Cntr=0;
 						
 //------_______________-----------__________________------____________						
 						if(BsFlags.ShiftValue){//y_pos%8!=0	
-
+							
 							for(dy=yPos;dy<BsFlags.Height+1;dy++){
 								for(dx=xPos; dx< BsFlags.Width /*&& (BsFlags.Width)<=128*/ ;dx++){
 										
@@ -471,7 +478,7 @@ buff_Cntr=0;
 										
 										
 												_buffer[buff_Cntr]=BsFlags.LocateMode0?/*READ SRAM*/ BMP[_Counter] :	\
-																			(!BsFlags.LocateMode1)?/*READ From FA*/BitmapFuncAddrss(&BMP[_Counter]):	\
+																			(!BsFlags.LocateMode1)?/*READ From FA*/BitmapFuncAddrss(_Counter):	\
 																					  /*READ From FLASH*/pgm_read_byte(&BMP[_Counter]);
 												if(dx>126 || dy>7)	Data_PORT=0;//Flush data port after overflow on corner 										  
 												else if(_Counter<height/*6*/){	
@@ -511,7 +518,7 @@ buff_Cntr=0;
 												else{
 													Data_PORT=( BsFlags.LocateMode0?/*ReadSram*/												\
 																( BMP[_Counter] & _mode ) :													\
-																( (!BsFlags.LocateMode1)?/*READ From FA*/BitmapFuncAddrss(&BMP[_Counter]):	\
+																( (!BsFlags.LocateMode1)?/*READ From FA*/BitmapFuncAddrss(_Counter):	\
 																			/*READ From FLASH*/pgm_read_byte(&BMP[_Counter]) & _mode )		\
 															);//?
 													_Do_Send(_Do_SendBusy_wait);
@@ -528,16 +535,5 @@ buff_Cntr=0;
 }//end of func
 //______________________________________________________________________________________________
 
+
 //__________________________________________________________________________________
-/*
-Font: Default*Arial*
-
-#define	FontSetReadSram	4
-#define	FontSet_FunctionAddress	0
-#define FontSet_ConstFlash	16
-
-*/
-void FontSet_ks0108(const uint8_t* FonT,uint8_t _mode){
-	Flag_Buffer.DefaultFont=FonT;
-	Flag_Buffer.DefaulFont_Mode=_mode;
-};

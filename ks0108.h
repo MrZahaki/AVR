@@ -1,13 +1,26 @@
 #ifndef KS0108_H_
 #define KS0108_H_
 
+
 #include <util/delay.h>
 #include <avr/io.h>
 #include <avr/pgmspace.h>
-#include "Fonts.h"
+
+
 
 
 #define _NULL 0
+
+	
+#define Screen_ColorMonochrom	0
+
+struct __Screen__{
+	uint8_t	width;
+	uint8_t	height;
+	unsigned	color_mode:1;
+	unsigned	segment_size:1;//in byte
+	uint16_t	_size;
+}Screen;
 	
 struct Tmp_Buffer{
 	unsigned RS:1;
@@ -15,21 +28,19 @@ struct Tmp_Buffer{
 	unsigned BackupRX_Flg:1;//backup RW AND RS flag
 	unsigned BackgroundDark:1;
 	
-	unsigned X_POS:7;//0-127
-	unsigned Y_POS:3;//0-7
-	unsigned BackupXY_Flg:2;//backup X,Y POSITION  flag[backup ready,bacup flag]
+	unsigned X_POS:7;//0-127	(keep xy pos)
+	unsigned Y_POS:3;//0-7		(keep xy pos)
+	unsigned BackupXY_Flg:2;//backup X,Y POSITION  flag	[backup ready,bacup flag]
 	
-	uint8_t DepPort_Backup;
-	uint8_t Data_Backup;
+	uint8_t DepPort_Backup;//used in Do function
+	uint8_t Data_Backup;//used in Do function
 	
-	const uint8_t *DefaultFont;
-	uint8_t	DefaulFont_Mode;
 	
-	unsigned	Buffer_UseFlag:1;
+	
+	//unsigned	Buffer_UseFlag:1;
 	//void(*Nippy_Init)(void);
 	void(*Nippy_Main)(void);
 }Flag_Buffer;	
-
 
 #define Init_ks0108_DarkBackground	ScreenFill_Dark
 #define Init_ks0108_LightBackground	ScreenFill_Light
@@ -58,7 +69,7 @@ void ScreenFill_ks0108(uint8_t	Color);
 #define	BitmapReadSram	4
 #define	BitmapMode_FunctionAddress	0
 #define BitmapMode_ConstFlash	16
-void 	BitmapSet_ks0108(const uint8_t	*BMP, char	xPos, char	yPos, uint8_t	width, uint8_t	 height,uint8_t (*BitmapFuncAddrss)(/*unsigned char suggested*/const void *), uint8_t		_mode);
+void 	BitmapSet_ks0108(const uint8_t	*BMP, char	xPos, char	yPos, uint8_t	width, uint8_t	 height,uint8_t (*BitmapFuncAddrss)(unsigned int ), uint8_t		_mode);
 //****************************
 /*
 modes of operation:
@@ -70,18 +81,11 @@ modes of operation:
 
 void 	BitmapClear_ks0108(const uint8_t	*BMP	\
 , char	xPos, char	yPos	\
-, uint8_t	width, uint8_t	 height	\
-,uint8_t (*BitmapFuncAddrss)(/*unsigned char suggested*/const void *)	\
+, uint16_t	width, uint16_t	 height	\
+,uint8_t (*BitmapFuncAddrss)(/*unsigned char suggested*/unsigned int)	\
 , uint8_t		_mode);
 
 //_______________________________________________________________________________________________
-#define	FontSetReadSram	4
-#define	FontSet_FunctionAddress	0
-#define FontSet_ConstFlash	16
-
-void FontSet_ks0108(const uint8_t* FonT,uint8_t _mode);
-
-void CharSet_ks0108();
 
 
 #endif
