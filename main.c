@@ -1,5 +1,10 @@
+
+
 #include "main.h"
 #include "bmp.h"
+#include <avr/interrupt.h>
+
+
 //#include "uart.h"
 //volatile float X=0,Y=0,buff;
 /*volatile int i=33;
@@ -12,6 +17,7 @@ void nippy_main(void);
 int main(void)
 {
 	usart_initial();
+	sei();
 	Nippy_Init(Nippy_Init_LightBackground,nippy);
 	//Uart_sendstring("hello world\n");
 	//pixel set test
@@ -56,12 +62,19 @@ void nippy(void){
 	
 	
 	mycar=Pregnant_Mother(Pregnant_Mother_DisableAutoFree);
-	mycar->BitmapFile=car;
-	mycar->BitmapMode=BitmapMode_ConstSram|BitmapMode_MergeOnScreen; 
-	mycar->X_Pos=0;
-	mycar->Y_Pos=0	;
-	mycar->Width=15;
-	mycar->Height=13;
+	mycar->BitmapFile=out0;
+	mycar->BitmapMode=BitmapMode_ConstSram|BitmapMode_SetOnScreen; 
+	mycar->X_Pos=10;
+	mycar->Y_Pos=20	;
+	mycar->Width=0xB;
+	mycar->Height=0x10;
+	
+	//tst_magnify=mycar;
+	/*Nippy_Send(mycar);
+	tst_magnify=Magnify(mycar,3,Scale_Mode_YCoordinate);
+	tst_magnify->X_Pos=40;
+	Nippy_Send(tst_magnify);*/
+	//Magnify()
 	/*
 	car_out0->BitmapMode=BitmapMode_ConstSram|BitmapMode_MergeOnScreen;
 	car_out0->X_Pos=0;
@@ -75,19 +88,56 @@ void nippy(void){
 	pixel->Y_Pos=63;
 	Nippy_Send(pixel);
 	*/
+	//
 	
-	tst_magnify= Magnify(mycar,3,Scale_Mode_Normal);
 	//tst_magnify= Magnify(mycar,3,Scale_Mode_Normal);
-	tst_magnify->X_Pos=20;
-	Nippy_Send(tst_magnify);
-	Nippy_Mop(tst_magnify);
-	Nippy_Send(mycar);
+	//tst_magnify->X_Pos+=10;
+	//tst_magnify= Magnify(mycar,5,Scale_Mode_Normal);
+	//mycar->Y_Pos=4; 
+	//Nippy_Send(tst_magnify);
+	
+	
+	
+	//Nippy_Mop(mycar);
+	
 	//Nippy_Send(*tst_magnify);
 	
 	
 	//Magnify(mycar,2,4/*send to screen*/);
+	//LcdSend_Char('g');
+	//char	a='a';
+	/*while(a<110){
+	LcdSend_Char(a++);
+	_delay_ms(100);
+	}*/
+	//Uart_sendchar('\n');
+	//Nippy_Text.Default_Font->default_size=4;
 	
- 
+// 	Name_Box("Bradley") ;
+// 	//Text_Mode(Text_Bold);
+// 	//Uart_sendstring(Nippy_Text.Default_Font->Font_Name);
+// 	LcdSend_String("in ");
+// 	
+// 	Name_Box("arial") ;
+// 	//Text_Mode(Text_Bold);
+// 	//Uart_sendstring(Nippy_Text.Default_Font->Font_Name);
+// 	LcdSend_String("the ");
+// 	
+// 	Name_Box("calisto") ;
+// 	//Text_Mode(Text_Bold);
+// 	//Uart_sendstring(Nippy_Text.Default_Font->Font_Name);
+// 	LcdSend_String("name of ");
+		//LcdSend_String("hello");
+	
+
+		//Text_Size(1);
+		Text_Mode(Text_Bold);
+		//Uart_sendstring(Nippy_Text.Default_Font->Font_Name);
+		LcdSend_String("GOD hello  im hossein " );
+	
+	
+	//Uart_sendstring(Nippy_Text.Default_Font->Font_Name);
+
 }
 
 void nippy_main(void){//dont use delay in here
@@ -97,7 +147,6 @@ void nippy_main(void){//dont use delay in here
 // 	tst_magnify= Magnify(mycar,x++,Scale_Mode_Normal);
 // 	Nippy_Send(tst_magnify);
 // 	_delay_ms(1000);
-	
 	
 	/*mycar->X_Pos++;
 	Nippy_Mop(&mycar);
@@ -110,4 +159,8 @@ void nippy_main(void){//dont use delay in here
 	_delay_ms(300);
 	Nippy_Mop(tst_magnify);
 	free(tst_magnify->BitmapFile);*/
+	/*if(Rx_Buffer_ready){
+			LcdSend_String(SerialRxBuffer);
+			used_buffer_flag=1;
+	}*/
 }

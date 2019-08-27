@@ -24,7 +24,7 @@
 #define	Scale_Mode_YCoordinate	4
 
 
-Nippy_Obj *Magnify( Child _OBj, uint8_t Magnify_Value,	uint8_t	Scale_Mode);
+Child Magnify( Child _OBj, uint8_t Magnify_Value,	uint8_t	Scale_Mode);
 
 
 

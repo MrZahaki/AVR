@@ -11,17 +11,16 @@
 #include <stdlib.h>
 #include <math.h>
 #include <stdarg.h>
-#include <stdint.h>
 
 /*
  * used in index_remover and Str_Extractor, StrCutter, index_adder, etc.
  * Reset and Auto Mode:
  *  Auto mode or default mode, which is used to automatically manage external variables
  *  (memory continuity and loss avoidance).
- * 
+ *
  * Insulate Mode:
  *  Insulate mode which is used to isolate the spaces allocated by this library
- * 
+ *
  * Ex_0(StrCutter):
  *      char *st0,*st1
  *      _Mode_(_MODE_Auto)
@@ -29,7 +28,7 @@
  *        Output: st0:"This is nippy string"
  *      st1=StrCutter(st0,5,12)
  *        Output: st0:"is nippy"    st1:"is nippy"
- * 
+ *
  * Ex_0(StrCutter):
  *      char *st0,*st1
  *      _Mode_(_MODE_Insulate)
@@ -77,7 +76,7 @@ mode StrSearch_First/Next_Occurrence: finding first/next occurrence in text:
                  _search:Input="o"
                  Mode: StrSearch_First_Occurrence
                  Result:Output(integer ) = 5 (index of searched string).
-                
+
                 search:Input="o"
                 Mode: StrSearch_Next_Occurrence
                 Result:Output(integer ) = 8 (index of searched string).
@@ -95,27 +94,27 @@ void* StrSearch(char* _str,char* _search ,char _mode );
  *  char *Search_str: A word or sentence from the reference string that will be changed.
  *  char *Replace_str:  A word or sentence that will be placed in the Search_str location of the reference string.
  *  char _Mode: Mode of operation (see below)
- * 
- * Mode 0:  StrReplace_All_Occurrences  
+ *
+ * Mode 0:  StrReplace_All_Occurrences
  *    finding and replacing all occurrences in text
- *    EX__1:  
+ *    EX__1:
  *        dest="the Microsoft Word is the word processor developed by Microsoft. It was first released on October 25, 1983."
  *        Search_str="Microsoft"
  *        Replace_str="NiPpY Str(:"
  *        _Mode:  StrReplace_All_Occurrences
  *        Result=StrReplace(dest, Search_str,Replace_str, _Mode)
  *        Result:(char *)="the NiPpY Str(: Word is the word processor developed by NiPpY Str(:. It was first released on October 25, 1983."
- * 
- * Mode 1:  StrReplace_First/Next_Occurrence  
+ *
+ * Mode 1:  StrReplace_First/Next_Occurrence
  *    finding first/next occurrence in text.
- *    EX__2:  
+ *    EX__2:
  *        dest="the Microsoft Word is the word processor developed by Microsoft. It was first released on October 25, 1983."
  *        Search_str="Microsoft"
  *        Replace_str="NiPpY Str(:"
  *        _Mode:  StrReplace_First_Occurrence
  *        Result=StrReplace(dest, Search_str,Replace_str, _Mode)
  *        Result:(char *)="the NiPpY Str(: Word is the word processor developed by Microsoft. It was first released on October 25, 1983."
- *        
+ *
  *        Search_str="Microsoft"
  *        Replace_str="NiPpY"
  *        _Mode:  StrReplace_Next_Occurrence
@@ -218,7 +217,7 @@ In the Str_IndexCreator function, memory loss is less than this function, but th
 _index frame(unsigned int):[size of frame,index_address0,index Numbers0,index_address1,index Numbers1,...]
 
 note that Input_Output_Link_Flag used for share same memory space between input an output.
- 
+
         Eg__1(auto mode)
                    char *st;
 
@@ -261,7 +260,7 @@ note that Input_Output_Link_Flag used for share same memory space between input 
                 function: fp=Str_IndexRemover(fp,5);
                 result="hllo orld"
 */
-                                       // 
+                                       //
 void *Str_IndexRemover(char *_inp, unsigned int _index);
 /*
 search in the string File(reference) for  find index of the _search(target) string in Two Mode.
@@ -289,7 +288,7 @@ search in the string File(reference) for  find index of the _search(target) stri
 convert integer number to equivalent number in string format
 	eg__0 input=233 output="233"
 */
- char *IntToStr(uint32_t inp);
+ char *IntToStr(unsigned long int inp);
  /*
 convert float number to equivalent number in string format,with p parameter Determining the precision in the number of decimal places is possible.
 
@@ -345,20 +344,20 @@ unsigned char  StrComp(char *_st1, char *_st2);
  * Math_validate_FLG: *Address* used in Str_Parse_Math Mode. true mode=1, false mode=0(see below)(output).
  * function output: unsigned int two dimensional array.
  * Note that first element in output is number of array elements
- * 
+ *
  * 1-MathMode:
  *    This can be done in functions that analyze mathematical expressions or used in mathematical libraries.
- *    This function can verify the correctness of the mathematical discipline (at the introductory level) using the input flag. (Developing) 
- *    
+ *    This function can verify the correctness of the mathematical discipline (at the introductory level) using the input flag. (Developing)
+ *
  *      EX__0:
  *          unsigned int **st
  *          char FLAG
  *          st=Str_Parse("2*pi p(3+2)-p%[32-3] ",Str_Parse_MathMode,&FLAG)
  *          output: FLAG: 0(validate false) | st={18,2,*,pi,p,(,3,+,2,),-,p,%,[,32,-,3,] }
- * 
+ *
  * 2-WordMode
  *    Use this to identify and find words in the input string.
- * 
+ *
  *      EX__2:
  *          unsigned int **st
  *          char FLAG(dont care),input[]="Microsoft Word is a word processor developed by Microsoft. It was first released on October 25, 1983 under the name Multi-Tool"
@@ -373,7 +372,7 @@ unsigned char  StrComp(char *_st1, char *_st2);
  *          st=Str_Parse(input,Str_Parse_DefaultMode | 'd',&FLAG)
  *          output: FLAG: (dont care) | st={8,'Microsoft Wor',' is a wor',' processor ','evelope',' by Microsoft. It was first release',' on October 25, 1983 un','er the name Multi-Tool'}
 
- * 
+ *
  */
 #define Str_Parse_MathMode 2
 #define Str_Parse_WordMode 1
@@ -385,7 +384,7 @@ void **Str_Parse(char *_st,char Mode,char *Math_validate_FLG/*1 true | 0 false*/
  *      char dest[10]="hello"
  *      StrCat(dest," world");
  *      out: dest="hello world"
- */ 
+ */
 char *StrCat(char *_dest,const char *_st0);
 /*
  * Use this function to join multiple strings(_st0,...,_stn) to the beginning of another string(_dest).
@@ -396,5 +395,21 @@ char *StrCat(char *_dest,const char *_st0);
  *      out: dest="we love nippy string"
  */
 char *StrnCat(char *_dest,int _n, ...);
+/*
+ *  -------->support '_MODE_' function
+ * convert any upper case to lower case in the text.
+ * Ex0:
+ *      char *out,ft[]="heLlO WoRlD"
+ *      out=  ToLower(ft);
+ *      out:    hello world
+ */
+void *ToLower(char *_inp);
+/*
+ *
+ *
+ *
+ *
+ */
+void *ToUpper(char *_inp);
 
 #endif

@@ -6,20 +6,68 @@
 	uint8_t nippy_buffer[Screen._size];
 	Child	Father;
 				
-				
+				0
 #endif
 
 //_______________________________________________________________________________
 char Nippy_Init(uint8_t	MODE,void(*INIT_FUNCTION)(void)){
-	/*static Nippy_Font	Default_Font;
-	Default_Font->BitmapMode =Font_Mode_ConstFlash;
-	Default_Font->BitmapFile = arial_narrow;
-	Default_Font->Font_Name=SET_FONT_NAME("arial");
 	
-	Nippy_Text->Default_Font=Default_Font;*/
+	Font	fnt;  
+	  
+	fnt=Pregnant_Mother(Pregnant_Mother_Font);
+	fnt->BitmapMode =Font_Mode_ConstFlash|Font_Mode_MergeOnScreen;
+	fnt->BitmapFile=bradley_hand_itc_italic;
+	fnt->default_size=1;
+	fnt->Font_Name=SET_FONT_NAME("bradley");
+	//Uart_sendstring(fnt->Font_Name);
+
+		
+	//__________________________________________
+	fnt=Pregnant_Mother(Pregnant_Mother_Font);
+	fnt->BitmapFile=calisto_mt;
+	fnt->BitmapMode=Font_Mode_ConstFlash|Font_Mode_MergeOnScreen;
+	fnt->default_size=1;
+	fnt->Font_Name=SET_FONT_NAME("calisto");
+	//Uart_sendstring(fnt->Font_Name);
+	//FontBox_Access(fnt);
+	//__________________________________________________________________
+	
+	fnt=Pregnant_Mother(Pregnant_Mother_Font);
+	fnt->BitmapMode =Font_Mode_ConstFlash|Font_Mode_MergeOnScreen;
+	fnt->BitmapFile = arial;
+	fnt->default_size=1;
+	fnt->Font_Name=SET_FONT_NAME("arial");
+	
+	
+	//__________________________________________________________________TEST STEP
+	/*
+ 	Uart_sendstring(IntToStr(FontBox_Check(fnt)));
+	 Uart_sendstring(IntToStr(FontBox_Check(fnt1)));
+	 Uart_sendstring(IntToStr(FontBox_Check(fnt2)));
+	 Uart_sendstring(IntToStr(FontBox_Check(fnt3)));*/
+	
+	//Name_Box("bradley");
+	
+	/*Uart_sendstring("  bradley: ");
+	if(fnt==Nippy_Text.Default_Font)    Uart_sendstring("  true ");
+	else    Uart_sendstring("  false ");
+
+	Uart_sendstring("  arial: ");
+	if(fnt1==Nippy_Text.Default_Font)    Uart_sendstring("true ");
+	else    Uart_sendstring("  false ");
+
+	Uart_sendstring("  calisto: ");
+	if(fnt2==Nippy_Text.Default_Font)    Uart_sendstring("  true ");
+	else    Uart_sendstring("  false ");*/
+	
+	
+	//__________________________________________________________________set default x y pos
+	Family___Mode.X_Pos=0;
+	Family___Mode.Y_Pos=0;
 	//__________________________________________________________________initial step
 		cycle=0;
 		Protect_period=(	(MODE>>1)&1 ? 350:	(	(MODE>>2)&1 ? 1000:100	)	);
+
 	
 	
 	#ifdef Init_BufferMode
@@ -89,10 +137,10 @@ void	Nippy_Mop(void * Mop_mode){
 		Child TMP;
 		TMP=Mop_mode;
 		
-		Uart_sendstring( IntToStr(TMP->Width));
+		/*Uart_sendstring( IntToStr(TMP->Width));
 		Uart_sendchar(' ');
 		Uart_sendstring(IntToStr(TMP->Height));
-		Uart_sendchar(' ');
+		Uart_sendchar(' ');*/
 		
 		BitmapClear_ks0108( (TMP->BitmapFile), (TMP->X_Pos), (TMP->Y_Pos), (TMP->Width), (TMP->Height), (TMP->BitmapFuncAddrss), (TMP->BitmapMode) );
 	}	
@@ -144,14 +192,14 @@ int ChildCTL_Check(void *ptr){//variable address 1:true  0:false
 //Add new variable in list
 Child ChildCTL_Add(void *ptr,uint8_t	_mode){// variable address
 	unsigned int _cntr=0;
-
+	
 	for(;_cntr<Child_no;_cntr++)
 	if(*(ChildCTL+_cntr) == 0){
 		*(ChildCTL + _cntr)=malloc(sizeof(nippy_Var));
 		ChildCTL[ _cntr]->_address=(long)ptr;
-		ChildCTL[ _cntr]->access_counter=10;
+		ChildCTL[ _cntr]->access_counter=6;
 		ChildCTL[_cntr]->access_cycle=cycle;
-		ChildCTL[_cntr]->Enable_Protect=_mode;
+		ChildCTL[_cntr]->Enable_Protect=_mode&1;
 		return ptr;
 	}
 
@@ -160,7 +208,7 @@ Child ChildCTL_Add(void *ptr,uint8_t	_mode){// variable address
 	ChildCTL[ Child_no]->_address=(long)ptr;
 	ChildCTL[ Child_no++]->access_counter=10;
 	ChildCTL[_cntr]->access_cycle=cycle;
-	ChildCTL[_cntr]->Enable_Protect=_mode;
+	ChildCTL[_cntr]->Enable_Protect=_mode&1;
 	//printf("in function=%x\n",ptr);
 	return (Child) ptr;
 }
@@ -258,3 +306,16 @@ void FamilyMode(uint8_t	_mode){
 	Family___Mode.Auto_Free_Mode= (_mode&1) ?	FamilyMode_EnableAutoFree:	FamilyMode_DisableAutoFree;
 	
 }//func
+//______________________________________________________________________
+/*
+	e.g.	
+		Nippy_Font	Test_font;
+		Test
+			
+*/
+char *SET_FONT_NAME(char	*Name){
+	 char *PTR;
+	 PTR=malloc(Str_len(Name)+1);
+	 StrCpy(PTR,Name);
+	 return	PTR;
+}

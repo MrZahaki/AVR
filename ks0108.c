@@ -420,25 +420,22 @@ modes of operation:
 #define BitmapMode_ConstFlash	16
 ***** Nippy_Mop(&mycar);
 */
-void 	BitmapClear_ks0108(const uint8_t	*BMP	\
-						, char	xPos, char	yPos	\
-						, uint16_t	width, uint16_t	 height	\
-						,uint8_t (*BitmapFuncAddrss)(/*unsigned char suggested*/unsigned int)	\
+void 	BitmapClear_ks0108(const uint8_t	*BMP	
+						, char	xPos, char	yPos	
+						, uint16_t	width, uint16_t	 height	
+						,uint8_t (*BitmapFuncAddrss)(/*unsigned char suggested*/unsigned int)	
 						, uint8_t		_mode){
 							
 uint8_t	_buffer[(2*width)],Data_Buffer;
 uint16_t	_Counter=0,buff_Cntr=0;
 uint8_t dx,dy/*object Corner*/ ;
 
-Uart_sendstring( IntToStr(width));
-Uart_sendchar(' ');
-Uart_sendstring(IntToStr(height));
-Uart_sendchar(' ');
+
 
 //PRE REQUESTICS
 struct BS_Strct{
-	uint8_t	Width;
-	uint8_t	Height;
+	uint16_t	Width;
+	uint16_t	Height;
 
 	unsigned ShiftValue:5;
 	unsigned LocateMode0:1;//Locate On Sram or flash.
@@ -467,13 +464,11 @@ buff_Cntr=0;
 							
 							for(dy=yPos;dy<BsFlags.Height+1;dy++){
 								for(dx=xPos; dx< BsFlags.Width /*&& (BsFlags.Width)<=128*/ ;dx++){
-										
+									
 									
 										_mode=Read_ks0108(Read_DisplayData,dx,dy);
 										XYSet_ks0108(dx,XYSet_DontMatterPos);
 										if(dy==yPos)	Data_Buffer=( (1<<BsFlags.ShiftValue)-1 ) & _mode;
-
-
 										else	Data_Buffer=0;
 										
 										
@@ -482,14 +477,14 @@ buff_Cntr=0;
 																					  /*READ From FLASH*/pgm_read_byte(&BMP[_Counter]);
 												if(dx>126 || dy>7)	Data_PORT=0;//Flush data port after overflow on corner 										  
 												else if(_Counter<height/*6*/){	
-														Data_PORT=Data_Buffer|((_buffer[buff_Cntr]<<BsFlags.ShiftValue) & _mode & ( (buff_Cntr>(width-1)) ?		\
+														Data_PORT=Data_Buffer|(~(_buffer[buff_Cntr]<<BsFlags.ShiftValue) & _mode & ~( (buff_Cntr>(width-1)) ?		\
 																  (	_buffer[buff_Cntr-width]>>(8-BsFlags.ShiftValue)) :		 \
 																  (_buffer[buff_Cntr+width]>>(8-BsFlags.ShiftValue))  )/*Outer or*/) ;
 														_Do_Send(_Do_SendBusy_wait);			
 												}//else if
 												else{	
 													Data_Buffer=( ( (1<<(8-BsFlags.ShiftValue))-1 )<<BsFlags.ShiftValue) & _mode;
-													Data_PORT= Data_Buffer|(_mode&( (buff_Cntr>(width-1)) ?				\
+													Data_PORT= Data_Buffer|(_mode& ~( (buff_Cntr>(width-1)) ?				\
 												   					 (	_buffer[buff_Cntr-width]>>(8-BsFlags.ShiftValue)) :	 \
 																	 (_buffer[buff_Cntr+width]>>(8-BsFlags.ShiftValue))  )/*Outer or*/) ;
 													_Do_Send(_Do_SendBusy_wait);				 
@@ -508,19 +503,31 @@ buff_Cntr=0;
 //------_______________-----------__________________------____________								
 						else{//ypos%8==0
 							
+// 							Uart_sendstring( IntToStr(BsFlags.Height));
+// 							Uart_sendchar(' ');
+// 							Uart_sendstring(IntToStr(BsFlags.Width));
+// 							Uart_sendchar(' ');
+							
 							for(dy=yPos;dy<BsFlags.Height ;dy++){
 								for(dx=xPos; dx<BsFlags.Width /*&& (BsFlags.Width)<=128*/ ;dx++){
-							
-									
-								/*bitmap merge*/_mode=Read_ks0108(Read_DisplayData,dx,dy);	
+// 									Uart_sendstring(" dy: ");
+// 									Uart_sendstring( IntToStr(dy));
+// 									Uart_sendstring(" dx: ");
+// 									Uart_sendstring(IntToStr(dx));
+// 									Uart_sendchar(' ');
+								/*bitmap merge*/_mode=Read_ks0108(Read_DisplayData,dx,dy);
+												
+								//Uart_sendchar(_mode);
+
 												XYSet_ks0108(dx,XYSet_DontMatterPos);
 												if(dx>127 || dy>7)	Data_PORT=0;//Flush data port after overflow on corner 
 												else{
 													Data_PORT=( BsFlags.LocateMode0?/*ReadSram*/												\
-																( BMP[_Counter] & _mode ) :													\
-																( (!BsFlags.LocateMode1)?/*READ From FA*/BitmapFuncAddrss(_Counter):	\
-																			/*READ From FLASH*/pgm_read_byte(&BMP[_Counter]) & _mode )		\
+																( ~BMP[_Counter] & _mode ) :													\
+																(  ~((!BsFlags.LocateMode1)?/*READ From FA*/BitmapFuncAddrss(_Counter):	\
+																			/*READ From FLASH*/pgm_read_byte(&BMP[_Counter])) & _mode )		\
 															);//?
+													Uart_sendchar(Data_PORT);		
 													_Do_Send(_Do_SendBusy_wait);
 												
 												_Counter++;
@@ -534,6 +541,3 @@ buff_Cntr=0;
 	
 }//end of func
 //______________________________________________________________________________________________
-
-
-//__________________________________________________________________________________

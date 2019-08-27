@@ -13,7 +13,7 @@ nippy_Var VariableCTL={.Variable_BUF=0,.Variable_num=0};
 
 typedef struct {
 unsigned Insulate_Mode:1 ;//used in indexremover function(default auto)
-                
+
 }nippy_Mode;
 nippy_Mode STR_Mode={.Insulate_Mode=1};
 //_______________________________________________________________________________
@@ -27,7 +27,7 @@ void _MODE_(char M){
 /*
  * 'Variable control function' used for variable address identication in special functions.
  * These intrinsic functions are used in intelligent memory management and prevent the
-   allocation of additional memory to the addresses used by this library. 
+   allocation of additional memory to the addresses used by this library.
  * this function check variable that exist in list(1) or not(0).
  * true :1
  * false: 0
@@ -37,19 +37,19 @@ int VariableCTL_Check(void *ptr){//variable address
   for(;_cntr<VariableCTL.Variable_num;_cntr++)
       if(*(VariableCTL.Variable_BUF+_cntr) == (long)ptr) return 1;
   if( (ptr==0) || (VariableCTL.Variable_num==0) ) return 0;
-  return 0;       
+  return 0;
 }
 //_______________________________________________________________________________
 //Add new variable in list
 void VariableCTL_Add(void *ptr){// variable address
   unsigned int _cntr=0;
-  
+
   for(;_cntr<VariableCTL.Variable_num;_cntr++)
           if(*(VariableCTL.Variable_BUF+_cntr) == 0){
               *(VariableCTL.Variable_BUF+_cntr)=(long)ptr;
-              return ; 
+              return ;
           }
-  
+
   VariableCTL.Variable_BUF =realloc(VariableCTL.Variable_BUF ,(VariableCTL.Variable_num+1)*sizeof (void *));
   *(VariableCTL.Variable_BUF + VariableCTL.Variable_num++)=(long)ptr;
 }
@@ -59,7 +59,7 @@ void VariableCTL_Add(void *ptr){// variable address
 void VariableCTL_Free(void *ptr){
   unsigned int _cntr=0;
   for(;_cntr<VariableCTL.Variable_num;_cntr++)
-          if(*(VariableCTL.Variable_BUF+_cntr) == (long)ptr)  *(VariableCTL.Variable_BUF+_cntr)=0; 
+          if(*(VariableCTL.Variable_BUF+_cntr) == (long)ptr)  *(VariableCTL.Variable_BUF+_cntr)=0;
 }
 //_______________________________________________________________________________
 unsigned int Str_len(char *str_){//Str_len of one *str
@@ -142,41 +142,41 @@ unsigned int _i,_j,_buf,_offset=0,ReplaceStr_len,Search_len;
 
 ReplaceStr_len= Str_len(Replace_str);
 Search_len=Str_len(Search_str);
-dest=Str_IndexAdder(dest,' ', _index);        
+dest=Str_IndexAdder(dest,' ', _index);
 if(_Mode == StrReplace_All_Occurrences){
                                 InP=(unsigned int *)StrSearch(dest,Search_str,StrSearch_All_Occurrences);
                                 for(_i=1; _i < *InP; _i++){
-                                    _buf=InP[_i]+_offset-1;                                  
+                                    _buf=InP[_i]+_offset-1;
                                     if(ReplaceStr_len > Search_len) {
                                         _index[1]=_buf;//address
                                         _index[2]=ReplaceStr_len-Search_len;//index numbers
                                         _offset+= _index[2];
-                                        dest=Str_IndexAdder (dest,' ',_index );                                                          
+                                        dest=Str_IndexAdder (dest,' ',_index );
                                     }
                                     else if(ReplaceStr_len < Search_len){
                                       dest=Str_Extractor (dest, _buf, _buf+Search_len-ReplaceStr_len-1 );
                                       _offset-=Search_len-ReplaceStr_len;
                                     }
-                                                                                                                        
-                                    for(_j=0;_j<ReplaceStr_len;_j++)  *(dest+_buf+_j)=*(Replace_str+_j);                                                                         
-                                }//for                                
+
+                                    for(_j=0;_j<ReplaceStr_len;_j++)  *(dest+_buf+_j)=*(Replace_str+_j);
+                                }//for
 }//if
 else{
                                     _i=(unsigned int )StrSearch(dest,Search_str,_Mode);
                                     _buf=_i+_offset-1;
-                                  
+
                                     if(ReplaceStr_len > Search_len) {
                                         _index[1]=_buf;//address
                                         _index[2]=ReplaceStr_len-Search_len;//index numbers
                                         _offset+= _index[2];
-                                        dest=Str_IndexAdder (dest,' ',_index );                                                          
+                                        dest=Str_IndexAdder (dest,' ',_index );
                                     }
                                     else if(ReplaceStr_len < Search_len){
                                       dest=Str_Extractor (dest, _buf, _buf+Search_len-ReplaceStr_len-1 );
                                       _offset-=Search_len-ReplaceStr_len;
                                     }
-                                                                                                                        
-                                    for(_j=0;_j<ReplaceStr_len;_j++)  *(dest+_buf+_j)=*(Replace_str+_j);     
+
+                                    for(_j=0;_j<ReplaceStr_len;_j++)  *(dest+_buf+_j)=*(Replace_str+_j);
   }
 return dest;
 }
@@ -259,7 +259,7 @@ unsigned int _i, _j, Out_size=0;
 
 
 Out_size=Str_len(_inp);
-char_size=sizeof(char); 
+char_size=sizeof(char);
 _j=Str_len(_inp);
 //printf("\n str=%s \n",_inp);
 //printf("Out_size=%d \n",Out_size);
@@ -281,7 +281,7 @@ for(_i=2;_i<*_index;_i+=2){
         else{
             OuT=calloc(Out_size+1,char_size);
              if(STR_Mode.Insulate_Mode) VariableCTL_Add (OuT);
-        }    
+        }
         for(_i=0;_i<Out_size;) *((char*)OuT+_i++)=0;
         for(_i=1;_i<*_index;_i+=2){//base
                 for(_j=1;_j<*_index;_j+=2){//in progress
@@ -299,8 +299,8 @@ for(_i=2;_i<*_index;_i+=2){
 printf("\n");*/
 
 //printf("\n str=%s \n",_inp);
-            
-  
+
+
         _i=0;
         _j=0;
         while( *(_inp+_j) ){
@@ -315,7 +315,7 @@ printf("\n");*/
                 _j++;
         }//while
          *((char*)OuT+ Out_size) = *(_inp+_j);
-        //printf("%s\n",_inp ); 
+        //printf("%s\n",_inp );
         if(memFlag) free(_inp);
         return OuT;
 }//if
@@ -327,24 +327,24 @@ return (int *)-1;
 void *Str_IndexRemover(char *_inp, unsigned int _index){
 char    *OuT,memFlag=0,chr_size;
 unsigned int Out_size=0,_i =0,_j=0;
-  
+
 //printf("addrssIn:%x  ", _inp);
 Out_size=Str_len(_inp);
 chr_size=sizeof (char);
 if(_index > Out_size)   return 0;
-  
+
   if(STR_Mode.Insulate_Mode && VariableCTL_Check (_inp)){
       OuT=(char *)realloc(_inp,(Out_size+1)*chr_size);
 
        _inp=(char *)calloc(Out_size+1,chr_size);//insulate input
        StrCpy(_inp,OuT);
-      memFlag=1;   
+      memFlag=1;
   }
   else{
       OuT=(char *)calloc(Out_size,chr_size);
       if(STR_Mode.Insulate_Mode) VariableCTL_Add (OuT);
-  }     
-                                                         
+  }
+
 //printf("%s",_inp);
 
 Out_size=0;
@@ -360,8 +360,8 @@ while( *(_inp+_j) ){
         *((char*)OuT+ Out_size) = *(_inp+_j);
         if(memFlag) free(_inp);
         //else _MODE_ (_MODE_Auto);
-  
-//printf("addrssOut:%x\n", OuT);  
+
+//printf("addrssOut:%x\n", OuT);
 return OuT;
 }
 //_____________________________________________________________________________________________________________________________________
@@ -436,31 +436,32 @@ long int StrNumToInt(char *inp_,char state_){/*0-convert str numbers to equal in
 //_________________________________________________________________________________________________________________________
 #define ToEnd 0
 void *Str_Extractor(char *_inp,unsigned int FIndex,unsigned int LIndex){
-  
-unsigned int Out_size=0,_i =0,_j=0;  
+
+unsigned int Out_size=0,_i =0,_j=0;
 unsigned int _len,*OuT,memFlag=0,chr_size;
 
 _len=Str_len (_inp);
 Out_size=_len-(LIndex-FIndex);
-chr_size=sizeof (char);  
-  
-if(LIndex==0) LIndex=_len-1;  
+chr_size=sizeof (char);
+//check condition step
+if(LIndex==0) LIndex=_len-1;
 if( (LIndex > Str_len (_inp)-1) || (FIndex > LIndex ) ) return 0;
-                                                                  
-  
-//printf("addrssIn:%x  ", _inp);  
+
+
+//printf("addrssIn:%x  ", _inp);
+//variable ctl step
   if(STR_Mode.Insulate_Mode && VariableCTL_Check (_inp)){
       OuT=(char *)realloc(_inp,(Out_size)*chr_size);
 
        _inp=(char *)calloc(Out_size,chr_size);//insulate input
        StrCpy(_inp,OuT);
-      memFlag=1;   
+      memFlag=1;
   }
   else{
       OuT=(char *)calloc(Out_size,chr_size);
       if(STR_Mode.Insulate_Mode) VariableCTL_Add (OuT);
-  }     
-                                                         
+  }
+
 //printf("%s",_inp);
 
 Out_size=0;
@@ -469,7 +470,7 @@ while( *(_inp+_j) ){
                         //printf("\n_inp= %c\n",*_inp);
                         _j++;_i++;
                         continue;
-                }            
+                }
                 *((char*)OuT + Out_size++) = *(_inp+_j);
                 _i++;
                 _j++;
@@ -477,54 +478,53 @@ while( *(_inp+_j) ){
         *((char*)OuT+ Out_size) = *(_inp+_j);
         if(memFlag) free(_inp);
         //else _MODE_ (_MODE_Auto);
-  
-//printf("addrssOut:%x\n", OuT);  
-return OuT;    
-                                                                   
-//printf("\n\n" );             
-                                                                         
-return  _inp;
+
+//printf("addrssOut:%x\n", OuT);
+return OuT;
+
+//printf("\n\n" );
+
 }
 //_________________________________________________________________________________________________________________________
 void *StrCutter( char *_inp,int FIndex,int LIndex){//cutting string from first index to last index[include first and last indexes]
 	char *_res=0,FLG=0;//index is start from zero
   unsigned int _len=Str_len (_inp);
-  
+
   if(LIndex > (_len-1)) return 0;
-  
+
   if(!STR_Mode.Insulate_Mode){
     _MODE_ (_MODE_Auto);
     FLG=1;
-    VariableCTL_Free (_inp);  
+    VariableCTL_Free (_inp);
   }
-                                                    
+
   if(LIndex < (_len-1) ){
     _res= Str_Extractor (_inp,LIndex+1,0 );
     if(FIndex > 1) _res=Str_Extractor (_res,0 ,FIndex-1 );
     else if(FIndex==1) _res=Str_IndexRemover (_res, 0);
   }//if
-  
+
   else if(FIndex > 1) _res=Str_Extractor (_inp,0 ,FIndex-1 );
   else if(FIndex==1) _res=Str_IndexRemover (_inp, 0);
-  
+
   else if(STR_Mode.Insulate_Mode && VariableCTL_Check (_inp)){ //if(LIndex == _len && FIndex==0)
     _res=_inp;
   }
   else{
      _res=(char *)calloc(_len+1,sizeof (char));//insulate input
     StrCpy(_res,_inp);
-  }                                              
-  
+  }
+
   if(FLG){
     _MODE_ (_MODE_Insulate);
     VariableCTL_Free (_inp);
-  } 
+  }
   //printf("\nmode:%d\n", STR_Mode.Insulate_Mode);
 	return _res;
 }
 //_________________________________________________________________________________________________________________________
-char *IntToStr(uint32_t inp){
- 
+char *IntToStr(unsigned long int inp){
+
 signed char *req,i=1;
 
 
@@ -597,7 +597,7 @@ unsigned char IsAlpha(int c){//This function checks whether the passed single ch
 //_____________________________________________________________________________________________________________
 char IsNumber(char c){
   if(c<48 || c>57)  return 0;
- return 1; 
+ return 1;
 }
 //__________________________________________________________________________________________________________________________
 void StrCpy(char *_dest,const char *_st0){//COPY STR0 TO DEST
@@ -610,13 +610,13 @@ unsigned char StrComp(char *_st1, char *_st2){//compare str1(string format) with
 }
 //________________________________________________________________________________________________________________________
 /*
- * 
+ *
  * parsing string into Related components
  *
  * Ex:"  hello world ?+123[] -63/2 h _lio"
- * Mode_Math: 
+ * Mode_Math:
  * error out: return 0;
- * 
+ *
  */
 #define Str_Parse_MathMode 2
 #define Str_Parse_WordMode 1
@@ -636,99 +636,99 @@ void **Str_Parse(char *_st,char Mode,char *Math_validate_FLG/*1 true | 0 false*/
   unsigned int FIndex=0,NIndex=0;
   unsigned int **Out=NULL;
   char _buf,Err=-1;
-  
+
   if(Str_len(_st)<2) return 0;
   while(*_st == 32) _st++;
-  
+
   Size=sizeof( int*);
   Out=calloc (1,Size);
   *Out=calloc (1,sizeof(int));//used for out[0][0]
   _MODE_ (_MODE_Insulate);
-  
+
   if((Mode&1) && !(Mode>>1) ){//WordMode 1
-    
+
     while( SIndex (0) ){
       //terms
         if( IsAlpha (SIndex (0)) || SIndex (0)== 95 ){
-            while(SIndex (0) && (IsAlpha (SIndex (0)) || IsNumber(SIndex (0)) || SIndex (0)== 95 || SIndex (0)==45) ) NIndex++;           
-            _Count++; 
+            while(SIndex (0) && (IsAlpha (SIndex (0)) || IsNumber(SIndex (0)) || SIndex (0)== 95 || SIndex (0)==45) ) NIndex++;
+            _Count++;
             Out= realloc (Out,Size*(_Count+1));
           //printf("\nloop1: **nindex= %d**", NIndex);
-          *(Out+_Count)=(unsigned int *) StrCutter (_st, FIndex, NIndex-1);  
+          *(Out+_Count)=(unsigned int *) StrCutter (_st, FIndex, NIndex-1);
           //printf("%s\n", Out[1]);
           }//if
-        else 
+        else
           {
             while(SIndex(0)!=32 && SIndex(0)) NIndex++;//word detection
             FIndex = ++NIndex;
           }//else
     }//while
   }//if wordmode
-  
+
   else if ((Mode&2) && !(Mode>>2) ){//MathMode  2
-                                    
+
     while( SIndex (0) ){
-        
-        Mode=1;             
+
+        Mode=1;
         if( IsAlpha (SIndex (0)) || SIndex (0)== 95  ){
-            FIndex=NIndex; 
-            while(IsAlpha (SIndex (0)) || IsNumber(SIndex (0)) || SIndex (0)== 95 || SIndex (0)==45 ) NIndex++;                   
+            FIndex=NIndex;
+            while(IsAlpha (SIndex (0)) || IsNumber(SIndex (0)) || SIndex (0)== 95 || SIndex (0)==45 ) NIndex++;
             if(Err)Err=1;
-            
+
         }//if
         else if(  IsNumber(SIndex (0))  ){
-             FIndex=NIndex; 
-             while(IsNumber(SIndex (0))) NIndex++; 
+             FIndex=NIndex;
+             while(IsNumber(SIndex (0))) NIndex++;
              if(Err)Err=2;
-          }//if 
-        else if(  IsMath_Operator(SIndex (0))  ){  
+          }//if
+        else if(  IsMath_Operator(SIndex (0))  ){
             FIndex=NIndex++;
             if(Err)Err=3;
-          
+
         }
         else if(  IsRanege_Specifier(SIndex (0))  ){
              FIndex=NIndex++;
              _buf=-15;
-            
+
         }
-        else 
+        else
           {
             while(SIndex(0)!=32 && SIndex(0)) NIndex++;//word detection
             FIndex = ++NIndex;
             Mode=0;
           }//else
         if(Mode){
-            _Count++; 
+            _Count++;
             Out= realloc (Out,Size*(_Count+1));
             *(Out+_Count)=(unsigned int *) StrCutter (_st, FIndex, NIndex-1);
         }//if
         if(Err && Mode){
-          if(_buf==Err) Err=0; 
-          _buf=Err;       
+          if(_buf==Err) Err=0;
+          _buf=Err;
         }
     }//while
-    (Err)? (*Math_validate_FLG=1): (*Math_validate_FLG=0);  
+    (Err)? (*Math_validate_FLG=1): (*Math_validate_FLG=0);
   }
-                                                                                   
-  else{//DefaultMode 0  
+
+  else{//DefaultMode 0
     while( SIndex (1) ){
         NIndex++;
         if(  SIndex (0)== Mode ){
-            while(SIndex (0) && SIndex (0)!= Mode ) NIndex++;           
-            _Count++; 
+            while(SIndex (0) && SIndex (0)!= Mode ) NIndex++;
+            _Count++;
             Out= realloc (Out,Size*(_Count+1));
-          *(Out+_Count)=(unsigned int *) StrCutter (_st, FIndex, NIndex-1);  
+          *(Out+_Count)=(unsigned int *) StrCutter (_st, FIndex, NIndex-1);
           FIndex=NIndex+1;
-          
+
         }//if
-          
+
     }//while
     _Count++;
     Out= realloc (Out,Size*(_Count+1));
-          *(Out+_Count)=(unsigned int *) StrCutter (_st, FIndex, NIndex-1);  
-          FIndex=NIndex; 
+          *(Out+_Count)=(unsigned int *) StrCutter (_st, FIndex, NIndex-1);
+          FIndex=NIndex;
   }//else
-  
+
   **Out=(unsigned int)(_Count+1);
   _MODE_ (_MODE_Reset);
   return (void **)Out;
@@ -746,7 +746,7 @@ char *StrnCat(char *_dest,int _n, ...){
   va_start(valist,_n);//initial valist for number of arguments
 
   while(_n>0){
-        
+
     StrCpy((_dest+_len),va_arg(valist,char *));
     _len=Str_len(_dest);
     _n--;
@@ -755,7 +755,41 @@ char *StrnCat(char *_dest,int _n, ...){
   va_end(valist);
   return _dest;
 }
+//__________________________________________________________
+void *ToLower(char *_inp){
+char *OuT;
+unsigned int cntr;
 
+//variable ctl step process
+  if( !(STR_Mode.Insulate_Mode && VariableCTL_Check (_inp)) ){
+        OuT=(char *)calloc(sizeof(char),Str_len(_inp));
+      if(STR_Mode.Insulate_Mode) VariableCTL_Add (OuT);
+      StrCpy(OuT,_inp);
+  }//if
+  else  OuT=_inp;
 
+  for(cntr=0;*(OuT+cntr);cntr++){
+        if( OuT[cntr]>64 && OuT[cntr]<91 )  OuT[cntr]+=32;
+  }
+return  OuT;
+}//function
+//__________________________________________________________
+void *ToUpper(char *_inp){
+char *OuT;
+unsigned int cntr;
+
+//variable ctl step process
+  if( !(STR_Mode.Insulate_Mode && VariableCTL_Check (_inp)) ){
+        OuT=(char *)calloc(sizeof(char),Str_len(_inp));
+      if(STR_Mode.Insulate_Mode) VariableCTL_Add (OuT);
+      StrCpy(OuT,_inp);
+  }//if
+  else  OuT=_inp;
+
+  for(cntr=0;*(OuT+cntr);cntr++){
+        if( OuT[cntr]>96 && OuT[cntr]<123 )  OuT[cntr]-=32;
+  }
+return  OuT;
+}
 
 

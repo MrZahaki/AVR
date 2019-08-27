@@ -2,9 +2,10 @@
 
 #ifndef FONTS_H_
 #define FONTS_H_
-#include <avr/pgmspace.h>
+#include "Nippy.h"
 
-extern PROGMEM const uint8_t arial_narrow[];
-
+extern	PROGMEM const uint8_t arial[];
+extern	PROGMEM const	uint8_t bradley_hand_itc_italic[];
+extern	PROGMEM const	uint8_t calisto_mt[];
 
 #endif /* FONTS_H_ */

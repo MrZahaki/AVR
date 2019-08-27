@@ -1,12 +1,7 @@
 #ifndef KS0108_H_
 #define KS0108_H_
 
-
-#include <util/delay.h>
-#include <avr/io.h>
-#include <avr/pgmspace.h>
-
-
+#include "Nippy.h"
 
 
 #define _NULL 0

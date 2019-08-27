@@ -1,19 +1,36 @@
+/*
+NIPPY MODULE(PRIMARY FRIMWARE)
+*/
+
+
+#include <stdlib.h>
+#include <util/delay.h>
+#include <avr/io.h>
+#include <avr/pgmspace.h>
+
+#include "uart.h"
+#include "NiPpY_str.h"
+#include "Img_Process.h"
+#include "Fonts.h"
+#include "Text.h"
+#include "main.h"
+
 #ifndef NIPPY_H_
 #define NIPPY_H_
 
-#include <stdlib.h>
 
-#include "uart.h"
-
-
-#define KS0108_CS1_CS2	
-//#define Init_BufferMode	
+ 
+#define KS0108_CS1_CS2
+//#define Init_BufferMode
 
 
 #ifdef KS0108_CS1_CS2
 #include "ks0108.h"
-#include "Text.h"
+
 #endif
+
+
+
 //___________________________________screen_struct
 #define Screen_ColorMonochrom	0//4bit token
 #define Screen_ColorRGB	1
@@ -31,7 +48,7 @@ BitmapMode_FunctionAddress integer argument changes from 0 to (size of bitmap)
 
 #define BitmapMode_FreePage 8
 
-#define	BitmapMode_SetPixelOnXY	32//in this mode before setting pixel behavior function starts to run
+#define	BitmapMode_SetPixelOnXY	32//in this mode, before setting pixel behavior function starts to run
 #define	PixelColor_Dark	1
 #define PixelColor_Light	0
 
@@ -67,6 +84,9 @@ typedef struct{
 struct Nippy_state{
 	unsigned Auto_Free_Mode:1;
 	
+	uint16_t	X_Pos;
+	uint16_t	Y_Pos;
+	
 }Family___Mode;
 //_______________________________________________________________________________________
 #ifdef	Init_BufferMode
@@ -76,14 +96,20 @@ extern Nippy_Obj*	Father;
 #define  Child	Nippy_Obj*
 //#define  BornedChild	Nippy_Obj*//its an pointer
 
+#define	Pregnant_Mother_Font	2
 #define	Pregnant_Mother_EnableAutoFree	1
 #define	Pregnant_Mother_DisableAutoFree	0
 
 #define Pregnant_Mother(Mode)	Natural_Child_Birth(Mode)
-#define	Natural_Child_Birth(Mode)  ChildCTL_Add( malloc(sizeof( Nippy_Obj)),Mode )	
+#define	Natural_Child_Birth(Mode)  ((void	*)	((Mode>>1)&1)?	(Font)FontBoxAdd()/*Font mode*/:	\
+														(Child)ChildCTL_Add(	calloc(1,sizeof( Nippy_Obj)),Mode)	)	
 #define protect(pointer_obj) (*ChildProtect(pointer_obj))
 
 //#define Nippy_Mop()	ScreenFill_ks0108(Flag_Buffer.BackgroundDark);
+
+
+
+
 //________________________________________________________________________________________________
 #define  Nippy_Init_DarkBackground	0x1
 #define  Nippy_Init_LightBackground	0
@@ -156,5 +182,8 @@ void Child_Control(void* _child,uint16_t	_mode);
 #define FamilyMode_DisableAutoFree	0
 #define FamilyMode_EnableAutoFree	1
 void FamilyMode(uint8_t	_mode);
+//____________________________________________________________________
+char *SET_FONT_NAME(char	*Name);//used for setting Font_Name attribute  in Nippy_Font object
+
 
 #endif /* NIPPY_H_ */

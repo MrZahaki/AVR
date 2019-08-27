@@ -6,7 +6,7 @@
  */ 
 #include "Img_Process.h"
 
-volatile uint16_t	test[5];
+
 
 //element
 #define MaxFactor(Nmbr)   (log(Nmbr)/log(2))
@@ -118,7 +118,7 @@ Ptr=calloc( MaxF, OutElement_Size);//allocation
 for( Counter=0,Buff=0 ; Counter < MaxF; Counter++){
     if( (Counter!=0) && (Counter%inp == 0) )  Buff++;
     
-    test[4]=*(Ptr+Counter+1)=  (_Res[Buff] & Big_Factor  );
+    *(Ptr+Counter+1)=  (_Res[Buff] & Big_Factor  );
 							
 						
     _Res[Buff]=( OutElement_Size==32 ? 0 :(_Res[Buff]>>OutElement_Size) );
@@ -141,7 +141,7 @@ return Ptr;
 /* 
 magnify value must be protected
 */
-Nippy_Obj *Magnify( Child inp_obj, uint8_t Magnify_Value,	uint8_t	Scale_Mode){
+Child Magnify( Child inp_obj, uint8_t Magnify_Value,	uint8_t	Scale_Mode){
 	Child	out_obj;
 	
 if(Scale_Mode){
@@ -161,35 +161,37 @@ if(Scale_Mode){
 	//out_obj
 	out_obj=Pregnant_Mother(Pregnant_Mother_EnableAutoFree);
 	Set_Equal__(out_obj,inp_obj);
-	
-	
+// 	Uart_sendchar(inp_obj->Width);11
+// 	Uart_sendchar(inp_obj->Height);16
+		
 	magnify.LocateMode0=(inp_obj->BitmapMode>>2)&1	;	//bitmap read FA and sram
 	magnify.LocateMode1=(inp_obj->BitmapMode>>4)&1	;
 	
-	/*test=1;*/
 	//if(Scale_Mode & 1){//Scale_Mode_SetFather
 		
 	//}
-	test[0]=Bitmap_Size=( (inp_obj->Height%8==0)?((int)inp_obj->Height/8 ):((int)inp_obj->Height/8 +1)* inp_obj->Width );
+	Bitmap_Size=( ((inp_obj->Height%8==0)?((int)inp_obj->Height/8 ):((int)inp_obj->Height/8 +1))* inp_obj->Width );
+	//Uart_sendchar(Bitmap_Size);
 	if(	(Bitmap_Size*Magnify_Value) /*input bitmap max size*/ > Screen._size	/*Screen max size*/)
 			Magnify_Value	=	 Screen._size/Bitmap_Size ;//max size of magnify_value
 	//else{//Scale_Mode_SetChild(default)
 //_______________________________________________________________________________
 		if((Scale_Mode>>1) & 1){//Scale_Mode_XCoordinate
 			//Outout size caculations
-			/*test=*/
 			
 			out_obj->BitmapFile=calloc( (Magnify_Value*Bitmap_Size) , sizeof(char) );
 			ChildCTL_Add(out_obj->BitmapFile,ChildCTL_Add_AutoFree);
 			out_obj->Width*=Magnify_Value;
-			
+
+//_____________________________________________________magnifyign process
+						
 			counter161=0;
 			for(counter160=0;counter160 < Bitmap_Size;counter160++){
 				
 				_data=magnify.LocateMode0?/*READ SRAM*/ inp_obj->BitmapFile[counter160] :	\
 				(!magnify.LocateMode1)?/*READ From FA*/inp_obj->BitmapFuncAddrss(counter160):	\
 				/*READ From FLASH*/pgm_read_byte(&inp_obj->BitmapFile[counter160]);
-				
+				//Uart_sendchar(_data);
 				for(counter80=0; counter80<Magnify_Value; counter80++)	out_obj->BitmapFile[counter161++]=_data;	
 				
 			}//outer for
@@ -200,30 +202,28 @@ if(Scale_Mode){
 			uint32_t	*_scale;
 			uint16_t counter162,counter163;
 			
-			test[3]=counter163/*max height value*/ =Bitmap_Size/inp_obj->Width;//see bitmap_size syntax
+			counter163/*max height value*/ =Bitmap_Size/inp_obj->Width;//see bitmap_size syntax
 			
 			//Uart_sendchar(counter163);
 			
-			test[1]=out_obj->Height *=Magnify_Value;
-			//Uart_sendchar(test[1]);
+			out_obj->Height *=Magnify_Value;
 			
-			test[2]=Bitmap_Size/*out size*/=	(( (out_obj->Height%8==0)?((int)out_obj->Height/8 ):((int)out_obj->Height/8 +1) ) * out_obj->Width 	);
+			Bitmap_Size/*out size*/=	(( (out_obj->Height%8==0)?((int)out_obj->Height/8 ):((int)out_obj->Height/8 +1) ) * out_obj->Width 	);
 			out_obj->BitmapFile=calloc( Bitmap_Size , sizeof(char) );
 			ChildCTL_Add(out_obj->BitmapFile,ChildCTL_Add_AutoFree);
 			
-			//test[3]= ( (inp_obj->Height%8==0)?((int)inp_obj->Height/8 ):((int)inp_obj->Height/8 +1) );
 			
-			test[4]=Scale_Mode= Screen.segment_size * Magnify_Value;//y coordinate jump value
+			Scale_Mode= Screen.segment_size * Magnify_Value;//y coordinate jump value
 			
 				for(	Bitmap_Size=0/*Data counter*/,counter160=0/*ypos*/;counter160<	counter163	;	counter160++){
 					for(	counter161=0/*xpos*/;	counter161<	inp_obj->Width;	counter161++){
 					
-					test[0]=_data=magnify.LocateMode0?/*READ SRAM*/ inp_obj->BitmapFile[Bitmap_Size++] :	\
+					_data=magnify.LocateMode0?/*READ SRAM*/ inp_obj->BitmapFile[Bitmap_Size++] :	\
 						(!magnify.LocateMode1)?/*READ From FA*/inp_obj->BitmapFuncAddrss(Bitmap_Size++):	\
 												/*READ From FLASH*/pgm_read_byte(&inp_obj->BitmapFile[Bitmap_Size++]);
 					
 					//_delay_ms(1000);
-					test[1]=counter162= counter160/*ypos*/	*	Scale_Mode	*	out_obj->Width + counter161/*xpos*/;
+					counter162= counter160/*ypos*/	*	Scale_Mode	*	out_obj->Width + counter161/*xpos*/;
 					if(_data){ 
 							_scale=VerticalMagnify(	_data,	Screen.segment_size,	Magnify_Value);
 							
@@ -232,17 +232,8 @@ if(Scale_Mode){
 // 							Uart_sendstring("  ");
 							
 							 for(counter80=0;(counter80<*_scale-1) && (counter80<Scale_Mode);counter80++){
-								test[3]=out_obj->BitmapFile[counter162+counter80 * out_obj->Width] =	_scale[counter80+1];
-								
-								//Uart_sendchar(' ');
-								test[2]=counter162+counter80 * out_obj->Width;
-// 									Uart_sendstring("conntent=  ");
-// 									Uart_sendstring( IntToStr(test[3]) );
-// 									Uart_sendstring("  ");
-// 									Uart_sendstring("index=  ");
-// 									Uart_sendstring( IntToStr(test[2]) );
-// 									Uart_sendstring("  ");
-								//_delay_ms(1000);
+								out_obj->BitmapFile[counter162+counter80 * out_obj->Width] =	_scale[counter80+1];
+								counter162+counter80 * out_obj->Width;
 							}// inner for
 							
 							for(;counter80<Scale_Mode;counter80++) /*check*/
@@ -252,14 +243,8 @@ if(Scale_Mode){
 					}//if
 					else
 						for(counter80=0;counter80<Scale_Mode;counter80++){
-							test[3]=out_obj->BitmapFile[counter162+counter80 * out_obj->Width] =	0;
-							test[2]=counter162+counter80 * out_obj->Width;
-// 							Uart_sendstring("conntent=  ");
-// 							Uart_sendstring( IntToStr(test[3]) );
-// 							Uart_sendstring("  ");
-// 							Uart_sendstring("index=  ");
-// 							Uart_sendstring( IntToStr(test[2]) );
-// 							Uart_sendstring("  ");
+							out_obj->BitmapFile[counter162+counter80 * out_obj->Width] =	0;
+							counter162+counter80 * out_obj->Width;
 							
 					}// inner for
 					
