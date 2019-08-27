@@ -49,6 +49,11 @@ typedef struct{
 #define Text_Mode(Mode)	(Nippy_Text._modes=Mode)
 #define Text_Size(_size_)	(Nippy_Text.Default_Font->default_size=_size_)
 #define Text_Color(_color_)	(Nippy_Text._color=_color_)
+
+#define TextPos_Dontcare	300
+#define Text_PosXY(X,Y)		X==TextPos_Dontcare?	1:(Family___Mode.X_Pos=X);	\
+							Y==TextPos_Dontcare?	1:(Family___Mode.Y_Pos=Y)
+
 struct Text_strct{
 	Nippy_Font	*Default_Font;
 	uint8_t	_modes;
