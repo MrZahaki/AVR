@@ -43,12 +43,16 @@ typedef struct{
 #define Text_None 0
 #define Text_Bold	1
 
+#define Text_black	0 //default
+#define Text_White	1
+ 
 #define Text_Mode(Mode)	(Nippy_Text._modes=Mode)
 #define Text_Size(_size_)	(Nippy_Text.Default_Font->default_size=_size_)
-
+#define Text_Color(_color_)	(Nippy_Text._color=_color_)
 struct Text_strct{
 	Nippy_Font	*Default_Font;
 	uint8_t	_modes;
+	uint8_t _color;
 		
 }Nippy_Text;
 

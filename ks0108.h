@@ -9,12 +9,16 @@
 	
 #define Screen_ColorMonochrom	0
 
+#define Screen_BackgroundColorDark	1//see l114:nippy.h
+#define Screen_BackgroundColorWhite	0
+
 struct __Screen__{
 	uint8_t	width;
 	uint8_t	height;
 	unsigned	color_mode:1;
 	unsigned	segment_size:1;//in byte
 	uint16_t	_size;
+	uint8_t		background_color;
 }Screen;
 	
 struct Tmp_Buffer{
@@ -72,6 +76,20 @@ modes of operation:
 #define	BitmapReadSram	4
 #define	BitmapMode_FunctionAddress	0
 #define BitmapMode_ConstFlash	16
+
+	BITMAP File format: rows of Vertical bytes(default for ks0108 data display)(bitmap file format)
+	x~0-127  y~0-63
+	modes of operation for monochrome display:
+bit0	BitmapSetFLASH_Full_Screen	0
+		BitmapSetFLASH_Custom_Screen	1
+		
+bit1	Bitmap_Merge	0
+		Bitmap_Set		1	
+
+bit2	BitmapReadFlash	0
+bit3	BitmapReadSram	1		
+
+
 */
 
 void 	BitmapClear_ks0108(const uint8_t	*BMP	\

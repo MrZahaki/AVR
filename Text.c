@@ -178,10 +178,16 @@ Child LcdSend_Char(char chr){//with default font format
 	
 	counter161=4+_CHAR_NUMBER_()+counter161;
 	//Uart_sendchar(counter161);	
-	for(cntr160=0;cntr160<offset/*size of out*/;cntr160++){
 	
-	_text_->BitmapFile[cntr160]=Read_Std(counter161+cntr160);
-	//Uart_sendchar(_text_->BitmapFile[cntr160]);
+	for(cntr160=0;cntr160<offset/*size of out*/;cntr160++){//read character data
+
+		if(Screen.color_mode==Screen_ColorMonochrom){//screen color mode
+			
+		_text_->BitmapFile[cntr160]=(	(Nippy_Text._color==Text_black)? \
+										Read_Std(counter161+cntr160):	 \
+										~Read_Std(counter161+cntr160)
+									);
+		}
 	}
 	
 	_buff=_text_;
@@ -198,7 +204,7 @@ Child LcdSend_Char(char chr){//with default font format
 		Family___Mode.X_Pos=0;
 		Family___Mode.Y_Pos+=_out->Height-3;
 	}
-	if(Family___Mode.Y_Pos/*+_out->Height*/ >= Screen.height){
+	if(Family___Mode.Y_Pos+_out->Height >= Screen.height){
 		Family___Mode.Y_Pos=0;
 		Family___Mode.X_Pos=0;
 	}

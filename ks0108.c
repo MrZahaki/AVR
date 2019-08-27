@@ -138,7 +138,8 @@ void Init_ks0108(uint8_t	mode,void (*Function_Call)(void)){
 	Screen.color_mode= Screen_ColorMonochrom;
 	Screen._size=1024;
 	Screen.segment_size=1;//one byte
-	Function_Call();	
+	Screen.background_color=mode&1;
+	Function_Call();	//calling nippy initial function
 	}//void
 //_________________________________________________________________________________________________________________________________________DATABUFFER
 /*
@@ -265,6 +266,8 @@ unsigned LocateMode1:1;//relate to	BitmapMode_FunctionAddress
 	
 	BsFlags.Width= width+xPos;
 	BsFlags.ApplyMode=(_mode>>1)&1;//bitmap merge and set
+	//in Screen_BackgroundColorDark mode set and merge methods Performance reverses to normal
+	if(Screen.background_color==Screen_BackgroundColorDark)	BsFlags.ApplyMode=	!BsFlags.ApplyMode; 
 	BsFlags.LocateMode0=(_mode>>2)&1;	//bitmap read FA and sram
 	BsFlags.LocateMode1=(_mode>>4)&1;
 	
